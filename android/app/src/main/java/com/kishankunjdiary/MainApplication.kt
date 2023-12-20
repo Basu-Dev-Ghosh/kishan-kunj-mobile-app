@@ -11,6 +11,10 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.flipper.ReactNativeFlipper
 import com.facebook.soloader.SoLoader
+import org.devio.rn.splashscreen.SplashScreenReactPackage;
+import com.christopherdro.htmltopdf.RNHTMLtoPDFPackage;
+import com.rnfs.RNFSPackage;
+import com.vinzscam.reactnativefileviewer.RNFileViewerPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -43,3 +47,7 @@ class MainApplication : Application(), ReactApplication {
     ReactNativeFlipper.initializeFlipper(this, reactNativeHost.reactInstanceManager)
   }
 }
+
+
+
+

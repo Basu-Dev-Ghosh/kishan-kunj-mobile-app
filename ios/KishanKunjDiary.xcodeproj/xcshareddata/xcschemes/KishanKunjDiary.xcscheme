@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "KishanKunjDiary.app"
-               BlueprintName = "KishanKunjDiary"
-               ReferencedContainer = "container:KishanKunjDiary.xcodeproj">
+               BuildableName = "Kishan.app"
+               BlueprintName = "Kishan"
+               ReferencedContainer = "container:Kishan.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "KishanKunjDiaryTests.xctest"
-               BlueprintName = "KishanKunjDiaryTests"
-               ReferencedContainer = "container:KishanKunjDiary.xcodeproj">
+               BuildableName = "KishanTests.xctest"
+               BlueprintName = "KishanTests"
+               ReferencedContainer = "container:Kishan.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "KishanKunjDiary.app"
-            BlueprintName = "KishanKunjDiary"
-            ReferencedContainer = "container:KishanKunjDiary.xcodeproj">
+            BuildableName = "Kishan.app"
+            BlueprintName = "Kishan"
+            ReferencedContainer = "container:Kishan.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "KishanKunjDiary.app"
-            BlueprintName = "KishanKunjDiary"
-            ReferencedContainer = "container:KishanKunjDiary.xcodeproj">
+            BuildableName = "Kishan.app"
+            BlueprintName = "Kishan"
+            ReferencedContainer = "container:Kishan.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
