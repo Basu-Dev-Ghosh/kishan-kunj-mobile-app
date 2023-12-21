@@ -126,6 +126,29 @@ export const formatTimestamp = (timestamp: string) => {
   return `${hours}:${minutes} - ${day} ${month} ${year}`;
 };
 
+export function getCurrentMonth() {
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  const currentDate = new Date();
+  const currentMonthIndex = currentDate.getMonth();
+  const currentMonth = months[currentMonthIndex];
+  const currentYear = currentDate.getFullYear();
+
+  return `${currentMonth} ${currentYear}`;
+}
 export async function getTotalExpenseForCurrentMonth() {
   try {
     const currentDate = new Date();
@@ -229,5 +252,34 @@ export async function getTotalExpensesOfEachUser() {
   } catch (err) {
     console.log(err);
     return new Map<number, number>();
+  }
+}
+
+export async function getTotalSpend(id: number): Promise<number | undefined> {
+  try {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // Months are zero-based, so adding 1
+
+    const startOfMonth = new Date(
+      Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0),
+    ); // Set to the first day of the current month
+    const endOfMonth = new Date(
+      Date.UTC(currentYear, currentMonth, 0, 23, 59, 59, 999),
+    ); // Set to the last day of the current month
+
+    const {data, error} = await supabase
+      .from('items')
+      .select('price')
+      .eq('userId', id)
+      .filter('createdAt', 'gte', startOfMonth.toISOString())
+      .filter('createdAt', 'lte', endOfMonth.toISOString());
+    if (error) throw new Error(error.message);
+    let totalSpend: number | undefined;
+    totalSpend = data?.reduce((acc, item) => (acc += item.price), 0);
+    return totalSpend;
+  } catch (err) {
+    console.log(err);
+    return 0;
   }
 }

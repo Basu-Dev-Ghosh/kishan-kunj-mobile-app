@@ -19,6 +19,8 @@ import {supabase} from '../supabase/supabase.config';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {decode} from 'base64-arraybuffer';
 import {useAuthState} from '../store/AuthStore';
+import {useQuery} from '@tanstack/react-query';
+import {getTotalSpend} from '../utils/item.utils';
 const ProfileScreen = ({
   navigation,
 }: {
@@ -34,7 +36,11 @@ const ProfileScreen = ({
     state.changePhoto,
   ]);
   const signout = useAuthState(state => state.signOut);
-
+  const {data: totalSpend} = useQuery<number | undefined>({
+    queryKey: ['total_spend', user?.id],
+    queryFn: () => getTotalSpend(user?.id || 0),
+    enabled: !!user?.id,
+  });
   async function changePassword() {
     try {
       const {data, error} = await supabase.auth.updateUser({
@@ -173,7 +179,7 @@ const ProfileScreen = ({
                     fontWeight: 'bold',
                     marginLeft: 6,
                   }}>
-                  2400
+                  {totalSpend?.toFixed(2) ?? 0}
                 </Text>
               </View>
             </View>

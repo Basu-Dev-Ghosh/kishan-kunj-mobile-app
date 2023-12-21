@@ -6,6 +6,7 @@ import {
   Image,
   FlatList,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import FileViewer from 'react-native-file-viewer';
 import React, {useState} from 'react';
@@ -16,10 +17,15 @@ import {NavigationProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {useQuery} from '@tanstack/react-query';
 import {getUsers} from '../utils/user.util';
-import {getTotalExpense, getTotalExpensesOfEachUser} from '../utils/item.utils';
+import {
+  getCurrentMonth,
+  getTotalExpense,
+  getTotalExpensesOfEachUser,
+} from '../utils/item.utils';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import RNFS from 'react-native-fs';
 import * as Progress from 'react-native-progress';
+import {queryClient} from '../App';
 function getFormattedDate() {
   const months = [
     'Jan',
@@ -184,17 +190,17 @@ const generatePDF = async (
     console.log(filePath);
 
     Alert.alert('Success', `PDF saved to ${folderPath}`);
-    const path = FileViewer.open(`${RNFS.DownloadDirectoryPath}`, {
-      showOpenWithDialog: true,
-    }) // absolute-path-to-my-local-file.
-      .then(() => {
-        // success
-      })
-      .catch(error => {
-        console.log(error);
+    // const path = FileViewer.open(`${RNFS.DownloadDirectoryPath}`, {
+    //   showOpenWithDialog: true,
+    // }) // absolute-path-to-my-local-file.
+    //   .then(() => {
+    //     // success
+    //   })
+    //   .catch(error => {
+    //     console.log(error);
 
-        // error
-      });
+    //     // error
+    //   });
   } catch (error: any) {
     console.log(error);
 
@@ -295,6 +301,7 @@ const CalculationResultScreen = ({
   navigation: NavigationProp<any, any>;
 }) => {
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<boolean>(false);
   const user = useCurrentUser(state => state.currentUser);
   const {data: userList} = useQuery<User[] | null>({
     queryKey: ['users'],
@@ -325,6 +332,18 @@ const CalculationResultScreen = ({
     generatePDF(allPdfData, setIsDownloading);
   }
 
+  const onRefresh = React.useCallback(() => {
+    setRefresh(true);
+    queryClient.invalidateQueries({
+      queryKey: ['total_result'],
+    });
+    queryClient.invalidateQueries({
+      queryKey: ['total_expenses'],
+    });
+    setTimeout(() => {
+      setRefresh(false);
+    }, 2000);
+  }, []);
   const renderItem = ({item}: {item: User}) => {
     return (
       <ResultBox
@@ -387,11 +406,21 @@ const CalculationResultScreen = ({
               </View>
             </TouchableOpacity>
           </View>
+          <Text style={{color: '#000', paddingHorizontal: 30, fontSize: 10}}>
+            {getCurrentMonth()}
+          </Text>
           <View style={styles.resultContainer}>
             {userList?.length === 0 ? (
               <Text style={{marginTop: 20}}>No users found</Text>
             ) : (
               <FlatList
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refresh}
+                    onRefresh={onRefresh}
+                    progressBackgroundColor={'#fff'}
+                  />
+                }
                 contentContainerStyle={{alignItems: 'center'}}
                 numColumns={2}
                 data={userList}

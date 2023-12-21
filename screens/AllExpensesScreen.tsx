@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   TextInput,
+  RefreshControl,
 } from 'react-native';
 import {debounce} from 'lodash';
 import React, {useState} from 'react';
@@ -16,8 +17,9 @@ import {NavigationProp} from '@react-navigation/native';
 
 import ExpenseBox from '../components/ExpenseBox';
 import {useQuery} from '@tanstack/react-query';
-import {getAllItems} from '../utils/item.utils';
+import {getAllItems, getCurrentMonth} from '../utils/item.utils';
 import {useFilter} from '../store/FilterStore';
+import {queryClient} from '../App';
 
 const AllExpensesScreen = ({
   navigation,
@@ -26,6 +28,7 @@ const AllExpensesScreen = ({
 }) => {
   const user = useCurrentUser(state => state.currentUser);
   const [searchTerm, setSearchTerm] = useState<string>('' as string);
+  const [refresh, setRefresh] = useState<boolean>(false);
   const {data: allItems} = useQuery<Item[] | null>({
     queryKey: ['all_items', user?.id, searchTerm],
     queryFn: () => getAllItems(searchTerm),
@@ -39,6 +42,16 @@ const AllExpensesScreen = ({
   const debouncedSearch = debounce(async value => {
     setSearchTerm(value);
   }, 300);
+
+  const onRefresh = React.useCallback(() => {
+    setRefresh(true);
+    queryClient.invalidateQueries({
+      queryKey: ['all_items', user?.id, searchTerm],
+    });
+    setTimeout(() => {
+      setRefresh(false);
+    }, 2000);
+  }, []);
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -57,6 +70,7 @@ const AllExpensesScreen = ({
             <Text style={{color: '#000', flex: 1, fontSize: 20}}>
               All Expenses
             </Text>
+
             <TouchableOpacity
               style={{
                 flex: 1,
@@ -75,6 +89,9 @@ const AllExpensesScreen = ({
               </View>
             </TouchableOpacity>
           </View>
+          <Text style={{color: '#000', paddingHorizontal: 28, fontSize: 10}}>
+            {getCurrentMonth()}
+          </Text>
           <View
             style={{
               width: '100%',
@@ -128,6 +145,15 @@ const AllExpensesScreen = ({
               <Text style={{marginTop: 20}}>No Expenses Found</Text>
             ) : (
               <FlatList
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refresh}
+                    onRefresh={onRefresh}
+                    // progressViewOffset={-400}
+                    style={{top: 10, zIndex: 100}}
+                    progressBackgroundColor={'#fff'}
+                  />
+                }
                 data={allItems}
                 renderItem={renderItem}
                 keyExtractor={item => item?.id?.toString() ?? ''}

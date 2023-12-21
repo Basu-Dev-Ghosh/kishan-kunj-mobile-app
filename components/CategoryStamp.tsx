@@ -10,6 +10,9 @@ const CategoryStamp = ({categoryId}: {categoryId: number}) => {
         height: 14,
         backgroundColor: categoriesColor[categoryId - 1],
         borderRadius: 7,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}>
       <Text
         style={{

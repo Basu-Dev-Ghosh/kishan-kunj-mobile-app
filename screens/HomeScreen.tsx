@@ -6,24 +6,27 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  RefreshControl,
 } from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import HeaderIcon from '../components/HeaderIcon';
 import {useCurrentUser} from '../store/UserStore';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
 import {FloatingAction} from 'react-native-floating-action';
 import ExpenseBox from '../components/ExpenseBox';
 import {NavigationProp} from '@react-navigation/native';
 import {useQuery} from '@tanstack/react-query';
 import {getCurrentUser, getUsers} from '../utils/user.util';
 import {
+  getCurrentMonth,
   getRecentItems,
   getTotalExpenseForCurrentMonth,
 } from '../utils/item.utils';
+import {queryClient} from '../App';
 
 const HomeScreen = ({navigation}: {navigation: NavigationProp<any, any>}) => {
+  const [refresh, setRefresh] = useState(false);
   const {data: userList} = useQuery<User[] | null>({
     queryKey: ['users'],
     queryFn: getUsers,
@@ -53,6 +56,16 @@ const HomeScreen = ({navigation}: {navigation: NavigationProp<any, any>}) => {
     }
   }, [currentUser]);
 
+  const onRefresh = React.useCallback(() => {
+    setRefresh(true);
+    queryClient.invalidateQueries({
+      queryKey: ['recent_items', currentUser?.id],
+    });
+    setTimeout(() => {
+      setRefresh(false);
+    }, 2000);
+  }, []);
+
   const renderItem = ({item}: {item: Item}) => {
     return <ExpenseBox item={item} />;
   };
@@ -61,8 +74,21 @@ const HomeScreen = ({navigation}: {navigation: NavigationProp<any, any>}) => {
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.mainContainer}>
         <HeaderIcon user={user} navigation={navigation} />
+
         <View style={styles.contentSection}>
           <View style={styles.totalExpensesContainer}>
+            <Text
+              style={{
+                color: '#000',
+                fontSize: 12,
+                textAlign: 'center',
+                alignSelf: 'flex-start',
+                fontWeight: 'bold',
+                paddingHorizontal: 24,
+                marginBottom: 7,
+              }}>
+              {getCurrentMonth()}
+            </Text>
             <View style={styles.totalExpensesBox}>
               <Text
                 style={{
@@ -73,6 +99,7 @@ const HomeScreen = ({navigation}: {navigation: NavigationProp<any, any>}) => {
                 }}>
                 TOTAL{' '}
               </Text>
+
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Icon
                   name="rupee"
@@ -197,6 +224,15 @@ const HomeScreen = ({navigation}: {navigation: NavigationProp<any, any>}) => {
                 <Text style={{marginTop: 20}}>No Recent Expenses</Text>
               ) : (
                 <FlatList
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={refresh}
+                      onRefresh={onRefresh}
+                      // progressViewOffset={-400}
+                      style={{top: 10, zIndex: 100}}
+                      progressBackgroundColor={'#fff'}
+                    />
+                  }
                   data={recentItems}
                   renderItem={renderItem}
                   keyExtractor={item => item?.id?.toString() ?? ''}
@@ -269,5 +305,6 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#fff',
     padding: 20,
+    marginTop: 14,
   },
 });
