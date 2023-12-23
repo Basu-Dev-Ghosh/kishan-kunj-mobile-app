@@ -1,3 +1,4 @@
+import {useCurrentUser} from '../store/UserStore';
 import {supabase} from '../supabase/supabase.config';
 
 export async function getUsers(): Promise<User[] | null> {
@@ -7,6 +8,21 @@ export async function getUsers(): Promise<User[] | null> {
       .select('id,email,fullName,displayName,department,image,ispresent');
     if (error) throw new Error(error.message);
     return data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+export async function getOnlineUsers(): Promise<User[] | null> {
+  try {
+    const currentUserId = useCurrentUser.getState().currentUser?.id;
+    const {data, error} = await supabase
+      .from('users')
+      .select('id,displayName,image,ispresent,email')
+      .neq('id', currentUserId)
+      .eq('ispresent', true);
+    if (error) throw new Error(error.message);
+    return data as User[];
   } catch (err) {
     console.log(err);
     return null;

@@ -1,6 +1,6 @@
 import {
   FlatList,
-  StyleSheet,
+    StyleSheet,
   Text,
   ToastAndroid,
   TouchableOpacity,
@@ -86,71 +86,73 @@ const ItemCategoryScreen = ({
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.mainContainer}>
         <HeaderIcon user={user} back={true} navigation={navigation} />
-        <View style={styles.contentSection}>
-          <View
-            style={{
-              paddingHorizontal: 30,
-              marginTop: 10,
-              alignItems: 'center',
-            }}>
-            <Text
-              style={{
-                textAlign: 'center',
-                fontSize: 26,
-                color: '#000',
-                fontWeight: 'bold',
-              }}>
-              Select Category
-            </Text>
-          </View>
-          <View style={styles.profileUpdatesContainer}>
-            <FlatList
-              numColumns={2}
-              contentContainerStyle={{
-                width: '100%',
-
-                alignItems: 'center',
-                flex: 3,
-              }}
-              data={categories}
-              renderItem={renderItem}
-              keyExtractor={item => item.id.toString()}
-              extraData={selectedId}
-            />
-          </View>
-          <TouchableOpacity
-            disabled={selectedId === 0}
-            style={[
-              styles.continueButton,
-              {
-                backgroundColor: selectedId === 0 ? '#D9D9D9' : '#1000F0',
-              },
-            ]}
-            onPress={() => {
-              if (selectedId >= 1 && selectedId <= 4) {
-                navigation.navigate('Add Item Screen');
-              } else {
-                ToastAndroid.show('Invalid User', ToastAndroid.CENTER);
-              }
-            }}>
+       
+          <View style={styles.contentSection}>
             <View
               style={{
-                height: '100%',
-                width: '100%',
-                flexDirection: 'row',
+                paddingHorizontal: 30,
+                marginTop: 10,
                 alignItems: 'center',
-                justifyContent: 'center',
               }}>
-              <Text style={{color: 'white'}}>Continue</Text>
-              <Icon
-                name="chevron-right"
-                style={{marginLeft: 10, marginTop: 2}}
-                size={13}
-                color="#fff"
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 26,
+                  color: '#000',
+                  fontWeight: 'bold',
+                }}>
+                Select Category
+              </Text>
+            </View>
+            <View style={styles.profileUpdatesContainer}>
+              <FlatList
+                numColumns={2}
+                contentContainerStyle={{
+                  width: '100%',
+
+                  alignItems: 'center',
+                  flex: 3,
+                }}
+                data={categories}
+                renderItem={renderItem}
+                keyExtractor={item => item.id.toString()}
+                extraData={selectedId}
               />
             </View>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              disabled={selectedId === 0}
+              style={[
+                styles.continueButton,
+                {
+                  backgroundColor: selectedId === 0 ? '#D9D9D9' : '#1000F0',
+                },
+              ]}
+              onPress={() => {
+                if (selectedId >= 1 && selectedId <= 4) {
+                  navigation.navigate('Add Item Screen');
+                } else {
+                  ToastAndroid.show('Invalid User', ToastAndroid.CENTER);
+                }
+              }}>
+              <View
+                style={{
+                  height: '100%',
+                  width: '100%',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Text style={{color: 'white'}}>Continue</Text>
+                <Icon
+                  name="chevron-right"
+                  style={{marginLeft: 10, marginTop: 2}}
+                  size={13}
+                  color="#fff"
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+     
       </View>
     </SafeAreaView>
   );

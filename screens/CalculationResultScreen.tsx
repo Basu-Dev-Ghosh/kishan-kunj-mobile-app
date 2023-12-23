@@ -7,7 +7,10 @@ import {
   FlatList,
   Alert,
   RefreshControl,
+  Platform,
+
 } from 'react-native';
+import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import FileViewer from 'react-native-file-viewer';
 import React, {useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -168,43 +171,51 @@ const generatePDF = async (
 
     const options = {
       html,
-      fileName: `KishanKunj-Bill-${allPdfData.month}`,
-      directory: 'KishanKunj-Bills',
+      fileName: `${allPdfData.month}`,
+      directory: `Documents`,
+      base64: true,
     };
-    const file = await RNHTMLtoPDF.convert(options);
+    if (Platform.OS === 'ios')
+      return Alert.alert('Error', 'This feature is not available on iOS');
+    const res = await request(PERMISSIONS.ANDROID.ACCESS_MEDIA_LOCATION);
+    if (res === RESULTS.BLOCKED) {
+      throw new Error('Please allow storage permission from settings');
+    }
+    if (res === RESULTS.DENIED) {
+      throw new Error('Storage permission denied');
+    }
+    if (res === RESULTS.UNAVAILABLE) {
+      throw new Error(
+        'This feature is not available (on this device / in this context)',
+      );
+    }
+
+    if (res === RESULTS.GRANTED) {
+      const file = await RNHTMLtoPDF.convert(options);
+      // console.log(file);
+
+      // await RNFS.mkdir(`${RNFS.DownloadDirectoryPath}/KishanKunj-Bills`);
+
+      const filePath = file.filePath;
+      // console.log(filePath);
+
+      // await RNFS.moveFile(
+      //   file.filePath as string,
+      //   `${RNFS.DownloadDirectoryPath}/KishanKunj-Bills`,
+      // );
+      // console.log(filePath, '->', folderPath);
+
+      Alert.alert('Success', `PDF saved to ${file.filePath}`);
+      const path = await FileViewer.open(filePath as string, {
+        showOpenWithDialog: true,
+      });
+      // console.log(path);
+    }
 
     // Get the path of the saved PDF
-    const filePath = file.filePath;
-
-    // Create a new folder if it doesn't exist
-    const folderPath = `${RNFS.DownloadDirectoryPath}`;
-    await RNFS.mkdir(folderPath);
-
-    console.log(RNFS.DownloadDirectoryPath);
-
-    await RNFS.moveFile(
-      filePath as string,
-      `${folderPath}/${options.fileName}.pdf`,
-    );
-    setIsDownloading(false);
-    console.log(filePath);
-
-    Alert.alert('Success', `PDF saved to ${folderPath}`);
-    // const path = FileViewer.open(`${RNFS.DownloadDirectoryPath}`, {
-    //   showOpenWithDialog: true,
-    // }) // absolute-path-to-my-local-file.
-    //   .then(() => {
-    //     // success
-    //   })
-    //   .catch(error => {
-    //     console.log(error);
-
-    //     // error
-    //   });
   } catch (error: any) {
-    console.log(error);
-
     Alert.alert('Error', error.message);
+  } finally {
     setIsDownloading(false);
   }
 };
@@ -334,10 +345,10 @@ const CalculationResultScreen = ({
 
   const onRefresh = React.useCallback(() => {
     setRefresh(true);
-    queryClient.invalidateQueries({
+    queryClient.refetchQueries({
       queryKey: ['total_result'],
     });
-    queryClient.invalidateQueries({
+    queryClient.refetchQueries({
       queryKey: ['total_expenses'],
     });
     setTimeout(() => {
@@ -358,78 +369,80 @@ const CalculationResultScreen = ({
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.mainContainer}>
         <HeaderIcon user={user} back={true} navigation={navigation} />
-        <View style={styles.contentSection}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: 20,
-              width: '100%',
-              paddingLeft: 20,
-            }}>
-            <Text
+       
+          <View style={styles.contentSection}>
+            <View
               style={{
-                color: '#000',
-                flex: 1,
-                fontSize: 20,
-              }}>
-              Calculation result
-            </Text>
-            <TouchableOpacity
-              onPress={downloadPDF}
-              style={{
-                flex: 1,
+                flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'center',
+                marginTop: 20,
+                width: '100%',
+                paddingLeft: 20,
               }}>
-              <View style={styles.downloadPdfButton}>
-                {!isDownloading ? (
-                  <>
-                    <Icon
-                      name="download"
-                      style={{marginRight: 10, marginTop: 3}}
-                      size={18}
-                      color="#fff"
+              <Text
+                style={{
+                  color: '#000',
+                  flex: 1,
+                  fontSize: 20,
+                }}>
+                Calculation result
+              </Text>
+              <TouchableOpacity
+                onPress={downloadPDF}
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <View style={styles.downloadPdfButton}>
+                  {!isDownloading ? (
+                    <>
+                      <Icon
+                        name="download"
+                        style={{marginRight: 10, marginTop: 3}}
+                        size={18}
+                        color="#fff"
+                      />
+                      <Text style={{fontSize: 14, color: '#fff'}}>
+                        Download PDF
+                      </Text>
+                    </>
+                  ) : (
+                    <Progress.Circle
+                      color="white"
+                      size={30}
+                      indeterminate={true}
                     />
-                    <Text style={{fontSize: 14, color: '#fff'}}>
-                      Download PDF
-                    </Text>
-                  </>
-                ) : (
-                  <Progress.Circle
-                    color="white"
-                    size={30}
-                    indeterminate={true}
-                  />
-                )}
-              </View>
-            </TouchableOpacity>
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
+            <Text style={{color: '#000', paddingHorizontal: 30, fontSize: 10}}>
+              {getCurrentMonth()}
+            </Text>
+            <View style={styles.resultContainer}>
+              {userList?.length === 0 ? (
+                <Text style={{marginTop: 20}}>No users found</Text>
+              ) : (
+                <FlatList
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={refresh}
+                      onRefresh={onRefresh}
+                      progressBackgroundColor={'#fff'}
+                    />
+                  }
+                  contentContainerStyle={{alignItems: 'center'}}
+                  numColumns={2}
+                  data={userList}
+                  renderItem={renderItem}
+                  keyExtractor={item => item?.id?.toString() ?? ''}
+                />
+              )}
+            </View>
           </View>
-          <Text style={{color: '#000', paddingHorizontal: 30, fontSize: 10}}>
-            {getCurrentMonth()}
-          </Text>
-          <View style={styles.resultContainer}>
-            {userList?.length === 0 ? (
-              <Text style={{marginTop: 20}}>No users found</Text>
-            ) : (
-              <FlatList
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refresh}
-                    onRefresh={onRefresh}
-                    progressBackgroundColor={'#fff'}
-                  />
-                }
-                contentContainerStyle={{alignItems: 'center'}}
-                numColumns={2}
-                data={userList}
-                renderItem={renderItem}
-                keyExtractor={item => item?.id?.toString() ?? ''}
-              />
-            )}
-          </View>
-        </View>
+      
       </View>
     </SafeAreaView>
   );

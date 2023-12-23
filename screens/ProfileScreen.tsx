@@ -102,6 +102,7 @@ const ProfileScreen = ({
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.mainContainer}>
         <HeaderIcon user={user} back={true} navigation={navigation} />
+
         <View style={styles.contentSection}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <View

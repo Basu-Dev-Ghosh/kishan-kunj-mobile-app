@@ -16,7 +16,7 @@ export const useCurrentUser = create<currentUserState>((set, get) => ({
     const newCurrentUser = {...currentUser, ispresent: value};
     set({currentUser: newCurrentUser});
     await updatePresentToDB(value, currentUser.email);
-    queryClient.invalidateQueries({queryKey: ['users']});
+    queryClient.refetchQueries({queryKey: ['users']});
   },
   changePhoto: async (value: string) => {
     const {currentUser} = get();
@@ -24,6 +24,6 @@ export const useCurrentUser = create<currentUserState>((set, get) => ({
     const newCurrentUser = {...currentUser, image: value};
     set({currentUser: newCurrentUser});
     await updateUserImageToDB(value, currentUser.email);
-    queryClient.invalidateQueries({queryKey: ['users']});
+    queryClient.refetchQueries({queryKey: ['users']});
   },
 }));

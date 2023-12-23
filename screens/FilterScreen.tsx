@@ -1,5 +1,6 @@
 import {
   SafeAreaView,
+
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -83,80 +84,83 @@ const FilterScreen = ({navigation}: {navigation: NavigationProp<any, any>}) => {
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.mainContainer}>
         <HeaderIcon back navigation={navigation} />
-        <View style={styles.contentSection}>
-          <View style={{flex: 4}}>
-            <FilterGroup
-              filter={{
-                title: 'Users',
-                options: userList?.map(user => {
-                  return {
-                    title: user.displayName,
-                    value: user.id,
-                  };
-                }),
-                value: filter.user,
-                setValue: setUserFilter,
-              }}
-            />
-            <FilterGroup
-              filter={{
-                ...categoryFilters,
-                value: filter.category,
-                setValue: setCategoryFilter,
-              }}
-            />
-            <FilterGroup
-              filter={{
-                ...priceFilters,
-                value: filter.price,
-                setValue: setPriceFilter,
-              }}
-            />
-          </View>
-          <View style={{flexDirection: 'row', flex: 1, paddingHorizontal: 20}}>
-            <TouchableOpacity
-              style={styles.continueButton}
-              onPress={() => {
-                resetFilter();
-                queryClient.invalidateQueries({
-                  queryKey: ['all_items', user?.id, ''],
-                });
-                navigation.goBack();
-              }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+        
+          <View style={styles.contentSection}>
+            <View style={{flex: 4}}>
+              <FilterGroup
+                filter={{
+                  title: 'Users',
+                  options: userList?.map(user => {
+                    return {
+                      title: user.displayName,
+                      value: user.id,
+                    };
+                  }),
+                  value: filter.user,
+                  setValue: setUserFilter,
+                }}
+              />
+              <FilterGroup
+                filter={{
+                  ...categoryFilters,
+                  value: filter.category,
+                  setValue: setCategoryFilter,
+                }}
+              />
+              <FilterGroup
+                filter={{
+                  ...priceFilters,
+                  value: filter.price,
+                  setValue: setPriceFilter,
+                }}
+              />
+            </View>
+            <View
+              style={{flexDirection: 'row', flex: 1, paddingHorizontal: 20}}>
+              <TouchableOpacity
+                style={styles.continueButton}
+                onPress={() => {
+                  resetFilter();
+                  queryClient.refetchQueries({
+                    queryKey: ['all_items', user?.id, ''],
+                  });
+                  navigation.goBack();
                 }}>
-                <Icon name="backward" size={16} color={'white'} />
-                <Text style={{fontSize: 16, color: 'white', marginLeft: 10}}>
-                  Reset
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.continueButton}
-              onPress={() => {
-                queryClient.invalidateQueries({
-                  queryKey: ['all_items', user?.id, ''],
-                });
-                navigation.goBack();
-              }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Icon name="backward" size={16} color={'white'} />
+                  <Text style={{fontSize: 16, color: 'white', marginLeft: 10}}>
+                    Reset
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.continueButton}
+                onPress={() => {
+                  queryClient.refetchQueries({
+                    queryKey: ['all_items', user?.id, ''],
+                  });
+                  navigation.goBack();
                 }}>
-                <Icon name="save" size={16} color={'white'} />
-                <Text style={{fontSize: 16, color: 'white', marginLeft: 10}}>
-                  Apply
-                </Text>
-              </View>
-            </TouchableOpacity>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Icon name="save" size={16} color={'white'} />
+                  <Text style={{fontSize: 16, color: 'white', marginLeft: 10}}>
+                    Apply
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        
       </View>
     </SafeAreaView>
   );

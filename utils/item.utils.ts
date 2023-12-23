@@ -1,27 +1,12 @@
+import {decode} from 'base64-arraybuffer';
 import {useFilter} from '../store/FilterStore';
 import {supabase} from '../supabase/supabase.config';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 export async function createItem(item: Item) {
   return await supabase.from('items').insert([{...item, date: new Date()}]);
 }
 
-export async function getRecentItems() {
-  try {
-    const {data, error} = await supabase
-      .from('items')
-      .select(`*,users (id,fullName,image)`)
-      .order('id', {ascending: false})
-      .limit(10);
-
-    if (error) throw new Error(error.message);
-    // console.log(data);
-
-    return data;
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
-}
 const priceFilterMap = [
   {
     min: 1,
@@ -281,5 +266,75 @@ export async function getTotalSpend(id: number): Promise<number | undefined> {
   } catch (err) {
     console.log(err);
     return 0;
+  }
+}
+
+export async function deleteItem(itemId: number | undefined) {
+  try {
+    const {error} = await supabase.from('items').delete().eq('id', itemId);
+    if (error) throw new Error(error.message);
+    return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+}
+export async function paidItemForUser(
+  itemId: number | undefined,
+  fromUserId: number | undefined,
+  toUserId: number | undefined,
+  fromName: string | undefined,
+) {
+  try {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      includeBase64: true,
+      maxHeight: 400,
+      maxWidth: 400,
+    });
+    if (!result.didCancel) {
+      const img = result?.assets?.[0];
+      const base64 = img?.base64;
+      const filePath = `${img?.fileName}`;
+      const contentType = img?.type;
+      const {data, error} = await supabase.storage
+        .from('payment_screenshots')
+        .upload(filePath, decode(base64 as string), {
+          contentType,
+          upsert: true,
+        });
+      if (error) {
+        console.log(error);
+        throw new Error(error.message);
+      }
+      let screenshotUrl = `https://yxzmhgkrjzcahpunapoj.supabase.co/storage/v1/object/public/payment_screenshots/${data.path}`;
+      const {error: requestError} = await supabase
+        .from('payment_requests')
+        .insert([
+          {
+            item_id: itemId,
+            from: fromUserId,
+            to: toUserId,
+            screenshot: screenshotUrl,
+            from_fullname: fromName,
+          },
+        ]);
+      if (requestError) throw new Error(requestError.message);
+      return {
+        msg: 'Paid request generated successfully',
+        status: true,
+      };
+    } else {
+      return {
+        msg: 'Image not selected',
+        status: false,
+      };
+    }
+  } catch (err: any) {
+    // console.log(err);
+    return {
+      msg: 'Already paid request generated',
+      status: false,
+    };
   }
 }

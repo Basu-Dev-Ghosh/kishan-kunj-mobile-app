@@ -9,8 +9,6 @@ import {
 import React, {useEffect} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {NavigationProp} from '@react-navigation/native';
-
-import {useAuthState} from '../store/AuthStore';
 import {supabase} from '../supabase/supabase.config';
 
 const HeaderIcon = ({
@@ -22,8 +20,6 @@ const HeaderIcon = ({
   back?: boolean;
   navigation?: NavigationProp<any, any>;
 }) => {
-  const signOut = useAuthState(state => state.signOut);
-
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
@@ -50,17 +46,24 @@ const HeaderIcon = ({
         <Text style={styles.logoTitle}>KISHAN{'\n'}KUNJ</Text>
       </View>
       {user && (
-        <TouchableOpacity
-          onPress={() => navigation?.navigate('Profile Screen')}>
-          <Image
-            source={{uri: user?.image}}
-            style={{
-              width: 50,
-              height: 50,
-              borderRadius: 400 / 2,
-            }}
-          />
-        </TouchableOpacity>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <TouchableOpacity
+            style={{marginRight: 24}}
+            onPress={() => navigation?.navigate('Notification Screen')}>
+            <Icon name="bell-o" color={'#1000F0'} size={30} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation?.navigate('Profile Screen')}>
+            <Image
+              source={{uri: user?.image}}
+              style={{
+                width: 50,
+                height: 50,
+                borderRadius: 400 / 2,
+              }}
+            />
+          </TouchableOpacity>
+        </View>
       )}
     </SafeAreaView>
   );

@@ -39,3 +39,33 @@ type FilterType = {
   value?: number;
   setValue?: (value: number) => void;
 };
+
+type PaidRequest = {
+  id: number;
+  createdAt: string;
+  screenshot: string;
+  from_fullname: string;
+  from: number;
+  items: {
+    description: string;
+    price: number;
+    id: number;
+  };
+  users: {
+    image: string;
+  };
+};
+
+type Notification = {
+  id: number;
+  createdAt: string;
+  status: string;
+  users: {
+    fullName: string;
+    image: string;
+  };
+  items: {
+    description: string;
+    price: number;
+  };
+};

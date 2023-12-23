@@ -13,26 +13,28 @@ const SelectUserScreen = ({
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.mainContainer}>
         <HeaderIcon />
-        <View style={styles.contentSection}>
-          <View
-            style={{
-              paddingHorizontal: 30,
-              marginTop: 10,
-              alignItems: 'center',
-            }}>
-            <Text
+       
+          <View style={styles.contentSection}>
+            <View
               style={{
-                textAlign: 'center',
-                fontSize: 26,
-                color: '#000',
-                fontWeight: 'bold',
+                paddingHorizontal: 30,
+                marginTop: 10,
+                alignItems: 'center',
               }}>
-              Select User
-            </Text>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 26,
+                  color: '#000',
+                  fontWeight: 'bold',
+                }}>
+                Select User
+              </Text>
 
-            <UsersList navigation={navigation} />
+              <UsersList navigation={navigation} />
+            </View>
           </View>
-        </View>
+        
       </View>
     </SafeAreaView>
   );
